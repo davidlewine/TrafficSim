@@ -9,20 +9,22 @@
  * @author David
  */
 import java.util.*;
+import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import static javafx.scene.transform.Transform.translate;
 
 
 public class TrafficSim {
@@ -51,50 +53,122 @@ public class TrafficSim {
     boolean displayLightBars = false;
     GraphicsContext gc;
     Canvas canvas;
-    ScrollPane guiScrollPane;
+    //ScrollPane canvasScrollPane;
     GridPane guiGridPane;
     Group guiRoot;
-    HBox guiControls; 
+    //HBox guiControls; 
+    int resetFrame = 0, frameCounter = 0, fps = 15;
+    AnimationTimer animationTimer;
     
 
 
-    public TrafficSim(int ww, int hh, Canvas c, Group root) {
-        canvas = c;
-        gc = canvas.getGraphicsContext2D();
+    public TrafficSim(int ww, int hh, Group groot) {
         w = ww;
         h = hh;
-        guiRoot = root;
+        guiRoot = groot;
         createGui();
+        resetFrame = 60/fps;
+        setup();
+        draw();
+        animationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+               if(frameCounter == resetFrame){
+                draw();
+                frameCounter = 0;
+               }
+               frameCounter++;
+
+            }
+        };
     }
     
     public void createGui(){
+        //create main sections of gui
+        canvas = new Canvas(w,h);
+        gc = canvas.getGraphicsContext2D();
+        ScrollPane canvasScrollPane = new ScrollPane(canvas);
         VBox controlsAndGrid = new VBox();
-        guiControls = new HBox();
-        controlsAndGrid.getChildren().add(guiControls);
-        guiRoot.getChildren().add(controlsAndGrid);
-        guiGridPane = new GridPane();
-        controlsAndGrid.getChildren().add(guiGridPane);
-        guiGridPane.setHgap(5);
-        guiGridPane.setVgap(5);
-        guiGridPane.setGridLinesVisible(true);
+        SplitPane mainSplitPane = new SplitPane(canvasScrollPane, controlsAndGrid);
+        mainSplitPane.setOrientation(Orientation.HORIZONTAL);
+        mainSplitPane.setDividerPositions(.5);
+        guiRoot.getChildren().add(mainSplitPane);
+        
+        //make gui control buttons
+        HBox guiButtons = new HBox();
         
         Button collisionButton = new Button("Clear Collisions");
         collisionButton.setOnAction((ActionEvent e)->{
             clearCollisions();
         });
-        guiControls.getChildren().add(collisionButton);
-        
-        Button clearButton = new Button("Clear Cars");
-        clearButton.setOnAction((ActionEvent e)->{
-            clearCars();
-        });
-        guiControls.getChildren().add(clearButton);
+        guiButtons.getChildren().add(collisionButton);
         
         Button dataButton = new Button("print data");
         dataButton.setOnAction((ActionEvent e)->{
             displayData();
         });
-        guiControls.getChildren().add(dataButton);
+        guiButtons.getChildren().add(dataButton);
+        
+        Button resetButton = new Button("reset");
+        resetButton.setOnAction((ActionEvent e)->{
+            reset();
+        });
+        guiButtons.getChildren().add(resetButton);
+        
+        Button runButton = new Button("run");
+        runButton.setOnAction((ActionEvent e)->{
+            animationTimer.start();
+        });
+        guiButtons.getChildren().add(runButton);
+        
+        Button pauseButton = new Button("pause");
+        pauseButton.setOnAction((ActionEvent e)->{
+            animationTimer.stop();
+        });
+        guiButtons.getChildren().add(pauseButton);
+        
+        controlsAndGrid.getChildren().add(guiButtons);
+        
+        //make gui input TextFields
+        HBox textFieldBox = new HBox();
+        Label streetsLabel = new Label("set streets");
+        Label avenuesLabel = new Label("set avenues");
+        TextField streets = new TextField("5");
+        streets.setOnAction((ActionEvent e)->{
+            numStreets = Integer.parseInt(streets.getText());
+        });
+        TextField avenues = new TextField("5");
+        avenues.setOnAction((ActionEvent e)->{
+            numAvenues = Integer.parseInt(avenues.getText());
+        });
+        textFieldBox.getChildren().addAll(streetsLabel, streets, avenuesLabel, avenues);
+        controlsAndGrid.getChildren().add(textFieldBox);
+        
+        
+       
+        
+        //make GridPane for light controls
+        guiGridPane = new GridPane();
+        ScrollPane gridScrollPane = new ScrollPane(guiGridPane);
+        guiGridPane.setHgap(5);
+        guiGridPane.setVgap(5);
+        //guiGridPane.setGridLinesVisible(true);
+        controlsAndGrid.getChildren().add(gridScrollPane);
+ 
+    }
+    
+    public void reset(){
+        animationTimer.stop();
+        allLights.clear();
+        allCars.clear();
+        finishedCars.clear();
+        streets.clear();
+        avenues.clear();
+        intersections.clear();
+        guiGridPane.getChildren().clear();
+        
+        setup();
+        draw();
     }
 
     public void setup() {
@@ -119,28 +193,29 @@ public class TrafficSim {
         }
         //setLights();
 
-        canvas.setOnMousePressed((MouseEvent e) -> {
-            for (Intersection intersection : intersections) {
-                intersection.onMousePressed();
-            }
-        }
-        );
-
-        canvas.setOnMouseReleased((MouseEvent e)-> {
-            for (Intersection intersection : intersections) {
-                intersection.onMouseReleased();
-            }
-        }
-        );
-        
-        canvas.setOnMouseMoved((MouseEvent e)-> {
-            mouseX = e.getX();
-            mouseY = e.getY();
-        }
-        );
+//        canvas.setOnMousePressed((MouseEvent e) -> {
+//            for (Intersection intersection : intersections) {
+//                intersection.onMousePressed();
+//            }
+//        }
+//        );
+//
+//        canvas.setOnMouseReleased((MouseEvent e)-> {
+//            for (Intersection intersection : intersections) {
+//                intersection.onMouseReleased();
+//            }
+//        }
+//        );
+//        
+//        canvas.setOnMouseMoved((MouseEvent e)-> {
+//            mouseX = e.getX();
+//            mouseY = e.getY();
+//        }
+//        );
     }
 
     public void draw() {
+        System.out.println("draw");
         gc.setFill(Color.WHITE);
         gc.fillRect(0,0,w, h);
 

@@ -31,43 +31,16 @@ public class TrafficFxLauncher extends Application {
     int fps = 15;
     int resetFrame;
     int frameCounter = 0;
+    AnimationTimer animationTimer;
     @Override
     public void start(Stage primaryStage) {
-        
-
-        final Canvas canvas = new Canvas(width,height);
-        //GraphicsContext gc = canvas.getGraphicsContext2D();
         Group root = new Group();
-        root.getChildren().add(canvas);
-        
         Scene scene = new Scene(root, width, height);
-        
         primaryStage.setTitle("Traffic");
         primaryStage.setScene(scene);
         primaryStage.show();
-        
-        Stage guiStage = new Stage();
-        Group guiRoot = new Group();
-        //ScrollPane guiScrollPane = new ScrollPane();
-        
-        Scene guiScene = new Scene(guiRoot, 400, 400);
-        guiStage.setScene(guiScene);
-        guiStage.show();
-        
-        TrafficSim ts = new TrafficSim(width, height, canvas, guiRoot);
-        ts.setup();
-        resetFrame = 60/fps;
-        new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-               if(frameCounter == resetFrame){
-                ts.draw();
-                frameCounter = 0;
-               }
-               frameCounter++;
 
-            }
-        }.start();
+        TrafficSim ts = new TrafficSim(width, height, root);
     }
 
     /**
