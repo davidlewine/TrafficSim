@@ -2,6 +2,7 @@
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -15,7 +16,7 @@ import javafx.scene.layout.VBox;
  *
  * @author David
  */
-public class LightGui extends VBox{
+public class LightGui extends GridPane{
     Intersection intersection;
     //VBox box; 
     TextField nsRedTime, ewRedTime, timerOffset;
@@ -24,11 +25,12 @@ public class LightGui extends VBox{
         intersection = is;
         
         //create timerOffset textField
-        HBox toBox = new HBox();
+        //HBox toBox = new HBox();
         timerOffsetLabel = new Label("TO:");
-        toBox.getChildren().add(timerOffsetLabel);
+        //toBox.getChildren().add(timerOffsetLabel);
         timerOffset = new TextField("" + intersection.timerOffset);
-        toBox.getChildren().add(timerOffset);
+        timerOffset.setPrefColumnCount(3);
+        //toBox.getChildren().add(timerOffset);
         timerOffset.setOnAction((ActionEvent e)->{
             int newTimerOffset = Integer.parseInt(timerOffset.getText());
             int dTimerOffset =  intersection.timerOffset - newTimerOffset;
@@ -38,14 +40,15 @@ public class LightGui extends VBox{
             intersection.eastLight.timer+= dTimerOffset;
             intersection.timerOffset = newTimerOffset;
         });
-        this.getChildren().add(toBox);
+        //this.add(toBox,);
         
         //create nsRedTime text field
-        HBox nshbox = new HBox();
+        //HBox nshbox = new HBox();
         nsRedTimeLabel = new Label("NSR:");
-        nshbox.getChildren().add(nsRedTimeLabel);
-        nsRedTime = new TextField("" + intersection.northLight.redTime); 
-        nshbox.getChildren().add(nsRedTime);
+        //nshbox.getChildren().add(nsRedTimeLabel);
+        nsRedTime = new TextField("" + intersection.northLight.redTime);
+        nsRedTime.setPrefColumnCount(3);
+        //nshbox.getChildren().add(nsRedTime);
         nsRedTime.setOnAction((ActionEvent e)->{
             System.out.println("ns set");
             //int newRedTime = Integer.parseInt(nsRedTime.getText());
@@ -55,15 +58,16 @@ public class LightGui extends VBox{
             System.out.println("nsrt: " + intersection.northLight.greenTime + " ewrt: " + intersection.eastLight.greenTime);
             
         });
-        this.getChildren().add(nshbox);
+        //this.getChildren().add(nshbox);
 
         
         //create ewRedTime text field
-        HBox ewhbox = new HBox();
+        //HBox ewhbox = new HBox();
         ewRedTimeLabel = new Label("EWG:");
-        ewhbox.getChildren().add(ewRedTimeLabel);
-        ewRedTime = new TextField("" + intersection.eastLight.redTime); 
-        ewhbox.getChildren().add(ewRedTime);
+        //ewhbox.getChildren().add(ewRedTimeLabel);
+        ewRedTime = new TextField("" + intersection.eastLight.redTime);
+        ewRedTime.setPrefColumnCount(3);
+        //ewhbox.getChildren().add(ewRedTime);
         ewRedTime.setOnAction((ActionEvent e)->{
             System.out.println("ew set");
             //int newRedTime = Integer.parseInt(ewRedTime.getText());
@@ -72,7 +76,14 @@ public class LightGui extends VBox{
             //nsRedTime.setText("" + intersection.northLight.redTime);
             System.out.println("nsrt: " + intersection.northLight.greenTime + " ewrt: " + intersection.eastLight.greenTime);
         });
-        this.getChildren().add(ewhbox);
+        //this.getChildren().add(ewhbox);
+        this.add(timerOffsetLabel, 0, 0);
+        this.add(timerOffset, 1, 0);
+        this.add(nsRedTimeLabel, 0, 1);
+        this.add(nsRedTime, 1, 1);
+        this.add(ewRedTimeLabel, 0, 2);
+        this.add(ewRedTime, 1, 2);
+        
     }
      
 }
