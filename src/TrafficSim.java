@@ -19,8 +19,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -53,9 +53,13 @@ public class TrafficSim {
     boolean displayLightBars = false;
     GraphicsContext gc;
     Canvas canvas;
+    ScrollPane gridScrollPane, dataScrollPane;
+    TextArea dataTextArea;
     //ScrollPane canvasScrollPane;
+    VBox controlsAndGrid;
     GridPane guiGridPane;
     Group guiRoot;
+    SplitPane mainSplitPane, gdSplitPane;
     //HBox guiControls; 
     int resetFrame = 0, frameCounter = 0, fps = 15;
     AnimationTimer animationTimer;
@@ -85,14 +89,19 @@ public class TrafficSim {
     
     public void createGui(){
         //create main sections of gui
-        canvas = new Canvas(w,h);
+        canvas = new Canvas(600,600);
         gc = canvas.getGraphicsContext2D();
         ScrollPane canvasScrollPane = new ScrollPane(canvas);
-        VBox controlsAndGrid = new VBox();
-        SplitPane mainSplitPane = new SplitPane(canvasScrollPane, controlsAndGrid);
+        canvasScrollPane.setPrefSize(w/2, h/2);
+        controlsAndGrid = new VBox();//controls, grid and data
+        controlsAndGrid.setPrefSize(500, 500);
+        
+        mainSplitPane = new SplitPane(canvasScrollPane, controlsAndGrid);
+        mainSplitPane.setPrefSize(w, h);
         mainSplitPane.setOrientation(Orientation.HORIZONTAL);
         mainSplitPane.setDividerPositions(.5);
-        guiRoot.getChildren().add(mainSplitPane);
+        ScrollPane mainScrollPane = new ScrollPane(mainSplitPane);
+        guiRoot.getChildren().add(mainScrollPane);
         
         //make gui control buttons
         HBox guiButtons = new HBox();
@@ -144,16 +153,27 @@ public class TrafficSim {
         textFieldBox.getChildren().addAll(streetsLabel, streets, avenuesLabel, avenues);
         controlsAndGrid.getChildren().add(textFieldBox);
         
-        
+         //controlsAndGrid.getChildren().add(gdSplitPane);
        
         
         //make GridPane for light controls
         guiGridPane = new GridPane();
-        ScrollPane gridScrollPane = new ScrollPane(guiGridPane);
+        gridScrollPane = new ScrollPane(guiGridPane);
         guiGridPane.setHgap(5);
         guiGridPane.setVgap(5);
         //guiGridPane.setGridLinesVisible(true);
-        controlsAndGrid.getChildren().add(gridScrollPane);
+        
+        gdSplitPane = new SplitPane();
+        dataTextArea = new TextArea();
+        dataScrollPane = new ScrollPane(dataTextArea);
+        dataScrollPane.setPrefSize(500, 300);
+        
+        gdSplitPane = new SplitPane(gridScrollPane, dataScrollPane);
+        gdSplitPane.setOrientation(Orientation.VERTICAL);
+        gdSplitPane.setDividerPositions(.7);
+        
+        controlsAndGrid.getChildren().add(gdSplitPane);
+        
  
     }
     
@@ -174,11 +194,11 @@ public class TrafficSim {
     public void setup() {
 
         for (int i = 0; i < numStreets; i++) {
-            streets.add(new Road(this, (i + 1) * w / (numStreets + 1), 0, 1 - (i % 2 * 2)));
+            streets.add(new Road(this, (i + 1) * 600 / (numStreets + 1), 0, 1 - (i % 2 * 2)));
         }
 
         for (int i = 0; i < numAvenues; i++) {
-            avenues.add(new Road(this, 0, (i + 1) * h / (numAvenues + 1), 1 - (i % 2 * 2)));
+            avenues.add(new Road(this, 0, (i + 1) * 600/(numAvenues + 1), 1 - (i % 2 * 2)));
         }
         for (int i = 0; i < streets.size(); i++) {
             for (int j = 0; j < avenues.size(); j++) {
@@ -215,7 +235,7 @@ public class TrafficSim {
     }
 
     public void draw() {
-        System.out.println("draw");
+        //System.out.println("draw");
         gc.setFill(Color.WHITE);
         gc.fillRect(0,0,w, h);
 
@@ -292,6 +312,12 @@ public class TrafficSim {
         System.out.println(avgTripTime);
         System.out.print("cars not finishing: ");
         System.out.println(allCars.size());
+        
+        dataTextArea.appendText("\nfinished cars: " + finishedCars.size() + "\n");
+        dataTextArea.appendText("avg time: " + avgTripTime + "\n");
+        dataTextArea.appendText("cars not finishing: " + allCars.size() + "\n");
+        dataTextArea.appendText("*************************\n");
+        
 
     }
     
