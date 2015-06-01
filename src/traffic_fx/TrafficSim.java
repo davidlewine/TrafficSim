@@ -176,13 +176,19 @@ public class TrafficSim {
     }
 
     public void setup() {
+        w = (numStreets+1)*100;
+        h = (numAvenues+1)*100;
+        canvas.setWidth(w);
+        canvas.setHeight(h);
 
         for (int i = 0; i < numStreets; i++) {
-            streets.add(new Road(this, (i + 1) * 600 / (numStreets + 1), 0, 1 - (i % 2 * 2)));
+            //streets.add(new Road(this, (i + 1) * 600 / (numStreets + 1), 0, 1 - (i % 2 * 2)));
+            streets.add(new Road(this, (i + 1) * 100, 0, 1 - (i % 2 * 2)));
         }
 
         for (int i = 0; i < numAvenues; i++) {
-            avenues.add(new Road(this, 0, (i + 1) * 600/(numAvenues + 1), 1 - (i % 2 * 2)));
+            //avenues.add(new Road(this, 0, (i + 1) * 600/(numAvenues + 1), 1 - (i % 2 * 2)));
+            avenues.add(new Road(this, 0, (i + 1) * 100, 1 - (i % 2 * 2)));
         }
         for (int i = 0; i < streets.size(); i++) {
             for (int j = 0; j < avenues.size(); j++) {
